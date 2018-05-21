@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>网图编辑器（变型）</title>
+    <style>::-webkit-scrollbar{display:none;}html,body{overflow:hidden;}</style>
+</head>
+<body>
+<div id="mountNode"></div>
+<script>/*Fixing iframe window.innerHeight 0 issue in Safari*/document.body.clientHeight;</script>
+<script src="https://gw.alipayobjects.com/os/antv/assets/g6/1.2.8/g6.min.js"></script>
+<script src="https://gw.alipayobjects.com/os/antv/assets/lib/jquery-3.2.1.min.js"></script>
+<script type="text/javascript">
+"use strict";
+var Util = G6.Util;
+var data = {
+  "nodes": [{
+    "shape": "customNode1",
+    "x": 280,
+    "y": 100,
+    "id": "27c5046d",
+    "name": 'text1'
+  }, {
+    "shape": "customNode1",
+    "x": 300,
+    "y": 330,
+    "id": "99d69b85",
+    "name": 'text2'
+  }, {
+    "shape": "customNode2",
+    "x": 400,
+    "y": 220,
+    "id": "f8cfdbd2",
+    "name": 'text3'
+  }, {
+    "shape": "customNode1",
+    "x": 80,
+    "y": 210,
+    "id": "3fabea06",
+    "name": 'text4'
+  }],
+  "edges": [{
+    "shape": "polyLineFlow",
+    "source": "27c5046d",
+    "target": "99d69b85",
+    "id": "73b7ef7f",
+    "sourceAnchor": 10,
+    "targetAnchor": 7
+  }, {
+    "shape": "polyLineFlow",
+    "source": "27c5046d",
+    "target": "f8cfdbd2",
+    "id": "cc306f85",
+    "sourceAnchor": 4,
+    "targetAnchor": 7
+  }, {
+    "shape": "polyLineFlow",
+    "source": "27c5046d",
+    "target": "f8cfdbd2",
+    "id": "519d49a4",
+    "sourceAnchor": 7,
+    "targetAnchor": 3
+  }, {
+    "shape": "polyLineFlow",
+    "source": "27c5046d",
+    "target": "3fabea06",
+    "id": "286f8ca2",
+    "sourceAnchor": 2,
+    "targetAnchor": 3
+  }, {
+    "shape": "polyLineFlow",
+    "source": "27c5046d",
+    "target": "3fabea06",
+    "id": "f559fec8",
+    "sourceAnchor": 6,
+    "targetAnchor": 0
+  }, {
+    "shape": "polyLineFlow",
+    "source": "27c5046d",
+    "target": "3fabea06",
+    "id": "4b0a2dcf",
+    "sourceAnchor": 9,
+    "targetAnchor": 5
+  }, {
+    "shape": "polyLineFlow",
+    "source": "99d69b85",
+    "target": "f8cfdbd2",
+    "id": "c2514050",
+    "sourceAnchor": 11,
+    "targetAnchor": 9
+  }]
+};
+
+var data1 = {
+  "source": {
+    "nodes": [{
+      "shape": "rect",
+      "label": "文本",
+      "x": 550,
+      "y": 260,
+      "id": "af11b7bc"
+    }, {
+      "shape": "rect",
+      "label": "文本",
+      "x": 780,
+      "y": 260,
+      "id": "313ed868"
+    }],
+    "edges": [{
+      "source": "af11b7bc",
+      "target": "313ed868",
+      "id": "bd2bc602"
+    }, {
+      "source": "313ed868",
+      "target": "af11b7bc",
+      "id": "1be6dc9f",
+      "size": 2,
+      "targetAnchor": 2,
+      "sourceAnchor": 2
+    }, {
+      "source": "af11b7bc",
+      "target": "313ed868",
+      "id": "3d463cd1",
+      "targetAnchor": 0,
+      "sourceAnchor": 0
+    }, {
+      "source": "313ed868",
+      "target": "af11b7bc",
+      "id": "ba7e057c",
+      "size": 6
+    }]
+  }
+};
+
+var nodeStyle = {
+  lineWidth: 1
+};
+
+G6.registerNode('customNode1', {
+  draw: function draw(cfg, group) {
+    console.log(cfg)
+    var shape = group.addShape('rect', {
+      attrs: {
+        x: cfg.x - 40,
+        y: cfg.y - 40,
+        width: 80,
+        height: 80,
+        fill: '#fff',
+        stroke: 'green'
+      }
+    });
+    return shape;
+  },
+  getAnchorPoints: function getAnchorPoints() {
+    return [[0, 0.25], [0, 0.5], [0, 0.75], [1, 0.25], [1, 0.5], [1, 0.75], [0.25, 0], [0.5, 0], [0.75, 0], [0.25, 1], [0.5, 1], [0.75, 1]];
+  }
+}, 'rect');
+
+G6.registerNode('customNode2', {
+  draw: function draw(cfg, group) {
+    console.log(cfg)
+    var shape = group.addShape('rect', {
+      attrs: {
+        x: cfg.x - 40,
+        y: cfg.y - 40,
+        width: 80,
+        height: 80,
+        fill: '#fff',
+        stroke: 'red',
+        label: cfg.label
+      }
+    });
+    return shape;
+  }
+}, 'customNode1');
+
+$('#mountNode').append('<div id="toolBar" style="position: absolute;z-index: 10"></div>');
+$('#toolBar').append('<button id="addCustom1">自定义形1</button>');
+$('#toolBar').append('<button id="addCustom2">自定义形2</button>');
+$('#toolBar').append('<button id="drag">拖拽模式</button>');
+$('#toolBar').append('<button id="edit">编辑模式</button>');
+$('#toolBar').append('<button id="save">保存</button>');
+
+var addCustom1 = $('#addCustom1');
+var addCustom2 = $('#addCustom2');
+var drag = $('#drag');
+var edit = $('#edit');
+var save = $('#save');
+
+var net = new G6.Net({
+  id: 'mountNode', // 容器ID
+  mode: 'edit', // 编辑模式
+  fitView: 'cc', // 自适应视口为左上
+  height: window.innerHeight // 画布高
+});
+// net.source(data.nodes, data.edges);
+net.read(data1)
+net.removeBehaviour(['hoverNodeShowAnchor', 'dragEdgeEndHideAnchor', 'dragNodeEndHideAnchor']);
+net.node().label('name').style(nodeStyle);
+
+//input
+var graphContainer = net.get('graphContainer');
+var input = Util.createDOM('<input class="g6-label-input">', {
+  position: 'absolute',
+  zIndex: 10,
+  display: 'none'
+});
+input.hide = function () {
+  input.css({
+    display: 'none'
+  });
+  input.visibility = false;
+};
+input.show = function () {
+  input.css({
+    display: 'block'
+  });
+  input.visibility = true;
+};
+input.on('keydown', function (ev) {
+  if (ev.keyCode === 13) {
+    updateLabel();
+  }
+});
+input.on('blur', function () {
+  updateLabel();
+});
+graphContainer.appendChild(input);
+
+
+
+// 第四步：配置绑定事件
+net.on('dragmove', function () {
+  input.hide();
+});
+addCustom1.on('click', function (ev) {
+  net.beginAdd('node', {
+    shape: 'customNode1' 
+  });
+});
+addCustom2.on('click', function (ev) {
+  net.beginAdd('node', {
+    shape: 'customNode2'
+  });
+});
+drag.on('click', function (ev) {
+  net.changeMode('drag');
+});
+edit.on('click', function (ev) {
+  net.changeMode('edit');
+});
+save.on('click', function (ev) {
+  var saveData = net.save();
+  var json = JSON.stringify(saveData, null, 2);
+  console.log(saveData, json);
+});
+// 第五️步：编辑交互变形
+net.on('dblclick', function (ev) {
+  var item = ev.item;
+  var shape = ev.shape;
+
+  console.log(hasClass(shape, 'label'))
+
+  if (hasClass(shape, 'label') && item && item.get('type') === 'node') {
+    showInputLabel(item);
+  }
+});
+
+var dragging = false;
+net.on('dragstart', function (ev) {
+  dragging = true;
+});
+net.on('dragend', function (ev) {
+  dragging = false;
+});
+// 进入锚点切换到曲线添加模式
+net.on('mouseenter', function (ev) {
+  var shape = ev.shape;
+  if (shape && shape.hasClass('anchor-point') && !dragging) {
+    net.beginAdd('edge', {
+      shape: 'polyLineFlow'
+    });
+  }
+});
+// 离开锚点切换回编辑模式
+net.on('mouseleave', function (ev) {
+  var shape = ev.shape;
+  if (shape && shape.hasClass('anchor-point') && !dragging) {
+    net.changeMode('edit');
+  }
+});
+// 绘制后显示锚点
+net.on('afteritemrender', function (ev) {
+  var item = ev.item;
+  if (item.get('type') === 'node') {
+    net.showAnchor(item);
+  }
+});
+// 第六步：渲染关系图
+net.render();
+
+
+function hasClass(shape, className) {
+  if (shape) {
+    const clasees = shape.get('class');
+    if (clasees && clasees.indexOf(className) !== -1) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function showInputLabel(node) {
+  if (!node) {
+    return;
+  }
+  var group = node.get('group');
+  var label = group.findBy(function (child) {
+    if (hasClass(child, 'label')) {
+      return true;
+    }
+    return false;
+  });
+  var rootGroup = net.get('rootGroup');
+  var bbox = Util.getBBox(label, rootGroup);
+  var borderWidth = 1;
+  var text = label.attr('text');
+  clearAllActived();
+
+  input.value = text;
+  input.show();
+  input.css({
+    top: bbox.minY - borderWidth + 'px',
+    left: bbox.minX - borderWidth + 'px',
+    width: bbox.width + 'px',
+    height: bbox.height + 'px',
+    padding: '0px',
+    margin: '0px',
+    border: borderWidth + 'px solid #999'
+  });
+  input.focus();
+  input.node = node;
+}
+
+function clearAllActived() {
+  net.clearAllActived();
+  net.refresh(false);
+}
+
+function updateLabel() {
+  if (input.visibility) {
+    var node = input.node;
+    clearAllActived();
+    if (input.value !== node.get('model').name) {
+      if (input.value) {
+        net.update(node, {
+          label: input.value
+        });
+      }
+    }
+    input.hide();
+  }
+}
+
+
+</script>
+</body>
+</html>
